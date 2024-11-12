@@ -73,7 +73,7 @@ jobs:
 
           aws bedrock-runtime invoke-model \
             --model-id anthropic.claude-3-sonnet-20240229-v1:0 \
-            --body "{\"prompt\": \"Human: $ESCAPED_PROMPT\nAssistant: \", \"max_tokens\": 2000}" \
+            --body '{"anthropic_version": "bedrock-2023-05-31", "messages": [{"role": "user", "content": "$ESCAPED_PROMPT"}], "max_tokens": 2000}' \
             --content-type "application/json" \
             response.json
 
