@@ -71,16 +71,12 @@ jobs:
           # Escape the PROMPT for JSON
           ESCAPED_PROMPT=$(echo "$PROMPT" | jq -Rs .)
 
-          aws bedrock-runtime invoke-model \
-            --model-id anthropic.claude-3-sonnet-20240229-v1:0 \
-            --body '{"anthropic_version": "bedrock-2023-05-31", "messages": [{"role": "user", "content": "$ESCAPED_PROMPT"}], "max_tokens": 2000}' \
-            --content-type "application/json" \
-            response.json
+          echo $ESCAPED_PROMPT > request.txt
 
-          cat response.json
+          python3 bedrock.py > response.txt
 
           # Extract just the text field using jq and store it in a variable
-          response_text=$(cat response.json | jq -r '.text')
+          response_text=$(cat response.txt)
 
           # Print the extracted text
           echo "Claude's response:"
