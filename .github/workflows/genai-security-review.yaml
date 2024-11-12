@@ -16,7 +16,7 @@ jobs:
         id: pr_diff
         run: |
           set -xe
-          PR_DIFF=$(curl -L -H "Accept: application/vnd.github.v3.diff" -H "Authorization: token ${{ secrets.GHE_TOKEN }}" https://ghe.coxautoinc.com/api/v3/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }})
+          PR_DIFF=$(curl -L -H "Accept: application/vnd.github.v3.diff" -H "Authorization: token ${{ secrets.GHE_TOKEN }}" https://github.com/api/v3/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }})
           echo "PR_DIFF<<EOF" >> $GITHUB_ENV
           echo "$PR_DIFF" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
