@@ -28,8 +28,6 @@ jobs:
         run: |
           set -xe
 
-          API_KEY="${{ secrets.COXAUTO_AI_API_KEY }}"
-          API_ENDPOINT="https://api.ai.coxautodev.com/v2/claude3-sonnet35"
           PROMPT=$(cat << EOT
           You are a security expert tasked with reviewing a pull request diff for potential security issues or concerns. Your job is to carefully analyze the changes and identify any security vulnerabilities, risks, or bad practices that could compromise the system's security.
 
@@ -75,7 +73,7 @@ jobs:
 
           aws bedrock-runtime invoke-model \
             --model-id anthropic.claude-3-sonnet-20240229-v1:0 \
-            --body "{\"prompt\": \"Human: say hello world\nAssistant: \", \"max_tokens\": 500}" \
+            --body "{\"prompt\": \"Human: $ESCAPED_PROMPT\nAssistant: \", \"max_tokens\": 2000}" \
             --content-type "application/json" \
             response.json
 
