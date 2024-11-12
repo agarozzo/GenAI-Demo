@@ -73,7 +73,7 @@ jobs:
 
           echo $ESCAPED_PROMPT > request.txt
 
-          python3 bedrock.py > response.txt
+          python3 scripts/bedrock.py > response.txt
 
           # Extract just the text field using jq and store it in a variable
           response_text=$(cat response.txt)
