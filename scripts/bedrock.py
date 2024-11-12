@@ -4,7 +4,11 @@ import json
 f = open('request.txt', 'r')
 data = f.read()
 
-bedrock = boto3.client(service_name='bedrock-runtime')
+# Create the bedrock client with specified region
+bedrock = boto3.client(
+    service_name='bedrock-runtime',
+    region_name='us-east-1'
+)
 
 body = json.dumps({
     "anthropic_version": "bedrock-2023-05-31",
