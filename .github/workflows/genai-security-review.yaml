@@ -12,6 +12,94 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Run a multi-line script
+      - name: Get PR diff
+        id: pr_diff
         run: |
-          aws sts get-caller-identity
+          set -xe
+          PR_DIFF=$(curl -L -H "Accept: application/vnd.github.v3.diff" -H "Authorization: token ${{ secrets.GHE_TOKEN }}" https://ghe.coxautoinc.com/api/v3/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }})
+          echo "PR_DIFF<<EOF" >> $GITHUB_ENV
+          echo "$PR_DIFF" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
+      - name: Echo PR diff
+        run: echo "$PR_DIFF"
+
+      - name: Communicate with AI
+        run: |
+          set -xe
+
+          API_KEY="${{ secrets.COXAUTO_AI_API_KEY }}"
+          API_ENDPOINT="https://api.ai.coxautodev.com/v2/claude3-sonnet35"
+          PROMPT=$(cat << EOT
+          You are a security expert tasked with reviewing a pull request diff for potential security issues or concerns. Your job is to carefully analyze the changes and identify any security vulnerabilities, risks, or bad practices that could compromise the system's security.
+
+          Here is the pull request diff to review:
+
+          <pull_request_diff>
+          $PR_DIFF
+          </pull_request_diff>
+
+          Carefully examine the diff and look for security issues such as:
+
+          1. Potential vulnerabilities (e.g., SQL injection, XSS, CSRF)
+          2. Insecure cryptographic practices
+          3. Hardcoded credentials or sensitive information
+          4. Improper access control
+          5. Insecure data handling or storage
+          6. Use of deprecated or vulnerable dependencies
+          7. Lack of input validation or sanitization
+          8. Potential for information leakage
+          9. Insecure configuration settings
+
+          If you identify any security concerns, list them in order of severity (most severe first) using the following format:
+
+          <security_concerns>
+          1. [Brief description of the issue]
+            Location: [File name and line number(s)]
+            Explanation: [Detailed explanation of the security risk and potential impact]
+
+          2. [Next issue, if any]
+            ...
+          </security_concerns>
+
+          If you do not find any security issues or concerns after thorough analysis, respond with exactly:
+
+          <response>No security issues found.</response>
+
+          Do not include any additional explanations or comments if no issues are found. Your response should be either a list of security concerns or the exact "No security issues found." message.
+          EOT
+          )
+          
+          # Escape the PROMPT for JSON
+          ESCAPED_PROMPT=$(echo "$PROMPT" | jq -Rs .)
+
+          aws bedrock-runtime invoke-model \
+            --model-id anthropic.claude-3-sonnet-20240229-v1:0 \
+            --body "{\"prompt\": \"Human: say hello world\nAssistant: \", \"max_tokens\": 500}" \
+            --content-type "application/json" \
+            response.json
+
+          cat response.json
+
+          # Extract just the text field using jq and store it in a variable
+          response_text=$(cat response.json | jq -r '.text')
+
+         # Print the extracted text
+          echo "Claude's response:"
+          echo "$response_text"
+          echo "CLAUDE_RESPONSE<<EOF" >> $GITHUB_ENV
+          echo "$response_text" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
+      - name: Post AI response as comment
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{secrets.GHE_TOKEN}}
+          script: |
+            const CLAUDE_RESPONSE = process.env.CLAUDE_RESPONSE;
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `**Response from ui.ai.coxautodev.com:**\n\n${CLAUDE_RESPONSE}`
+            })
