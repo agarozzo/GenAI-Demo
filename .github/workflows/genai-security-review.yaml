@@ -95,5 +95,5 @@ jobs:
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `**Response from ui.ai.coxautodev.com:**\n\n${CLAUDE_RESPONSE}`
+              body: `**Response from Claude (AWS Bedrock):**\n\n${CLAUDE_RESPONSE}`
             })
