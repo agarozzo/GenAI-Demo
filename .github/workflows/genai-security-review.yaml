@@ -82,7 +82,7 @@ jobs:
           # Extract just the text field using jq and store it in a variable
           response_text=$(cat response.json | jq -r '.text')
 
-         # Print the extracted text
+          # Print the extracted text
           echo "Claude's response:"
           echo "$response_text"
           echo "CLAUDE_RESPONSE<<EOF" >> $GITHUB_ENV
