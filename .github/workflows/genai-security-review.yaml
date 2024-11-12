@@ -7,17 +7,11 @@ on:
 
 jobs:
   hello:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
 
     steps:
       - uses: actions/checkout@v3
 
-      - name: Run a one-line script
-        run: echo "Hello, World!"
-
       - name: Run a multi-line script
         run: |
-          echo "Multiple lines of commands:"
-          echo "First line"
-          echo "Second line"
-          echo "Current date: $(date)"
+          aws sts get-caller-identity
