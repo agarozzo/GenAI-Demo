@@ -1,4 +1,4 @@
-name: Hello World Workflow
+name: AI PR Security Review
 
 on:
   pull_request:
@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  hello:
+  ai-process-pr-diff:
     runs-on: self-hosted
 
     steps:
