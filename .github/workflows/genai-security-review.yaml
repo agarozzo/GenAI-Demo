@@ -1,0 +1,23 @@
+name: Hello World Workflow
+
+on:
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  hello:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Run a one-line script
+        run: echo "Hello, World!"
+
+      - name: Run a multi-line script
+        run: |
+          echo "Multiple lines of commands:"
+          echo "First line"
+          echo "Second line"
+          echo "Current date: $(date)"
